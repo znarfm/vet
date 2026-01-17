@@ -4,13 +4,13 @@ import { PrismaClient } from "@/lib/generated/prisma/client";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 
 const prismaClientSingleton = () => {
-  return new PrismaClient({ adapter });
+	return new PrismaClient({ adapter });
 };
 
 type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClientSingleton | undefined;
+	prisma: PrismaClientSingleton | undefined;
 };
 
 // Use the existing instance or create a new one
