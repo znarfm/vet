@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  VET
+  STAFF
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NOSHOW
+}
+
+enum TransactionType {
+  SERVICE
+  PRODUCT
+  VACCINATION
+}
+
+// Account Profiles
+model Profile {
+  id           String          @id @db.Uuid // Links to Supabase Auth
+  email        String          @unique
+  fullName     String?
+  role         Role            @default(STAFF)
+  specialty    String? // e.g., "Surgeon", "General Practitioner"
+  appointments Appointment[]
+  records      MedicalRecord[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+// Clients who own the pets
+model Owner {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  phoneNumber String   @unique
+  email       String?
+  address     String?
+  pets        Pet[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Patients themselves
+model Pet {
+  id           String           @id @default(cuid())
+  name         String
+  species      String // Dog, Cat, Bird, etc.
+  breed        String?
+  gender       String? // Male, Female, Neutered, Spayed
+  birthDate    DateTime?
+  weightKg     Float? // Pets' weight fluctuates, good for tracking
+  ownerId      String
+  owner        Owner            @relation(fields: [ownerId], references: [id])
+  appointments Appointment[]
+  records      MedicalRecord[]
+  vaccines     PetVaccination[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model Appointment {
+  id        String            @id @default(cuid())
+  date      DateTime
+  reason    String
+  status    AppointmentStatus @default(SCHEDULED)
+  petId     String
+  pet       Pet               @relation(fields: [petId], references: [id])
+  vetId     String            @db.Uuid
+  vet       Profile           @relation(fields: [vetId], references: [id])
+  notes     String?
+  createdAt DateTime          @default(now())
+}
+
+model MedicalRecord {
+  id            String   @id @default(cuid())
+  date          DateTime @default(now())
+  diagnosis     String
+  treatment     String
+  notes         String?
+  prescriptions String? // Can also be a separate table if needed
+  petId         String
+  pet           Pet      @relation(fields: [petId], references: [id])
+  vetId         String   @db.Uuid
+  vet           Profile  @relation(fields: [vetId], references: [id])
+  invoice       Invoice? // Link medical visits to a bill
+}
+
+model Product {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  category      String // "Medicine", "Food", "Vaccine", "Supply"
+  price         Decimal   @db.Decimal(10, 2)
+  stockQuantity Int       @default(0)
+  // minStockLevel Int      @default(5) // For "Low Stock" alerts
+  expiryDate    DateTime?
+  updatedAt     DateTime  @updatedAt
+}
+
+model PetVaccination {
+  id           String   @id @default(cuid())
+  petId        String
+  pet          Pet      @relation(fields: [petId], references: [id])
+  vaccineName  String // e.g., "5-in-1", "Anti-Rabies"
+  administered DateTime @default(now())
+  dueDate      DateTime // When the next booster is needed
+  notes        String?
+}
+
+model Invoice {
+  id              String         @id @default(cuid())
+  amount          Decimal        @db.Decimal(10, 2)
+  isPaid          Boolean        @default(false)
+  medicalRecordId String?        @unique
+  medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id])
+  createdAt       DateTime       @default(now())
+}
