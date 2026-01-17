@@ -10,7 +10,7 @@ export async function updateSession(request: NextRequest) {
 	// variable. Always create a new one on each request.
 	const supabase = createServerClient(
 		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+		process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
 		{
 			cookies: {
 				getAll() {
@@ -38,6 +38,7 @@ export async function updateSession(request: NextRequest) {
 	// IMPORTANT: If you remove getClaims() and you use server-side rendering
 	// with the Supabase client, your users may be randomly logged out.
 	const { data } = await supabase.auth.getClaims();
+
 	const user = data?.claims;
 
 	if (
@@ -47,12 +48,12 @@ export async function updateSession(request: NextRequest) {
 	) {
 		// no user, potentially respond by redirecting the user to the login page
 		const url = request.nextUrl.clone();
-		url.pathname = "/auth/login";
+		url.pathname = "/login";
 		return NextResponse.redirect(url);
 	}
 
-	// IMPORTANT: You *must* return the supabaseResponse object as it is.
-	// If you're creating a new response object with NextResponse.next() make sure to:
+	// IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
+	// creating a new response object with NextResponse.next() make sure to:
 	// 1. Pass the request in it, like so:
 	//    const myNewResponse = NextResponse.next({ request })
 	// 2. Copy over the cookies, like so:
