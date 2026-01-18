@@ -122,9 +122,11 @@ function CardExample() {
 				</CardHeader>
 				<CardFooter>
 					<AlertDialog>
-						<AlertDialogTrigger render={<Button />}>
-							<IconPlus data-icon="inline-start" />
-							Show Dialog
+						<AlertDialogTrigger asChild>
+							<Button>
+								<IconPlus data-icon="inline-start" />
+								Show Dialog
+							</Button>
 						</AlertDialogTrigger>
 						<AlertDialogContent size="sm">
 							<AlertDialogHeader>
@@ -160,13 +162,6 @@ const frameworks = [
 	"Astro",
 ] as const;
 
-const roleItems = [
-	{ label: "Developer", value: "developer" },
-	{ label: "Designer", value: "designer" },
-	{ label: "Manager", value: "manager" },
-	{ label: "Other", value: "other" },
-];
-
 function FormExample() {
 	const [notifications, setNotifications] = React.useState({
 		email: true,
@@ -183,11 +178,11 @@ function FormExample() {
 					<CardDescription>Please fill in your details below</CardDescription>
 					<CardAction>
 						<DropdownMenu>
-							<DropdownMenuTrigger
-								render={<Button variant="ghost" size="icon" />}
-							>
-								<IconDotsVertical />
-								<span className="sr-only">More options</span>
+							<DropdownMenuTrigger asChild>
+								<Button variant="ghost" size="icon">
+									<IconDotsVertical />
+									<span className="sr-only">More options</span>
+								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end" className="w-56">
 								<DropdownMenuGroup>
@@ -435,17 +430,16 @@ function FormExample() {
 								</Field>
 								<Field>
 									<FieldLabel htmlFor="small-form-role">Role</FieldLabel>
-									<Select items={roleItems} defaultValue={null}>
+									<Select defaultValue="">
 										<SelectTrigger id="small-form-role">
-											<SelectValue />
+											<SelectValue placeholder="Select a role" />
 										</SelectTrigger>
 										<SelectContent>
 											<SelectGroup>
-												{roleItems.map((item) => (
-													<SelectItem key={item.value} value={item.value}>
-														{item.label}
-													</SelectItem>
-												))}
+												<SelectItem value="developer">Developer</SelectItem>
+												<SelectItem value="designer">Designer</SelectItem>
+												<SelectItem value="manager">Manager</SelectItem>
+												<SelectItem value="other">Other</SelectItem>
 											</SelectGroup>
 										</SelectContent>
 									</Select>
